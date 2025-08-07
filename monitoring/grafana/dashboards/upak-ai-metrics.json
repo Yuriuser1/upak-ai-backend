@@ -1,0 +1,63 @@
+{
+  "dashboard": {
+    "id": null,
+    "title": "UPAK AI Backend Metrics",
+    "tags": ["upak", "ai", "migration"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "id": 1,
+        "title": "AI Generations by Provider",
+        "type": "stat",
+        "targets": [
+          {
+            "expr": "sum by (provider) (upak_ai_generations_total)",
+            "legendFormat": "{{provider}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0}
+      },
+      {
+        "id": 2,
+        "title": "Generation Duration by Provider",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(upak_ai_generation_duration_seconds_bucket[5m])) by (le, provider))",
+            "legendFormat": "{{provider}} 95th percentile"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0}
+      },
+      {
+        "id": 3,
+        "title": "A/B Test Distribution",
+        "type": "piechart",
+        "targets": [
+          {
+            "expr": "sum by (provider) (upak_ab_test_requests_total)",
+            "legendFormat": "{{provider}}"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8}
+      },
+      {
+        "id": 4,
+        "title": "Error Rate by Provider",
+        "type": "graph",
+        "targets": [
+          {
+            "expr": "sum by (provider) (rate(upak_ai_generation_errors_total[5m]))",
+            "legendFormat": "{{provider}} errors/sec"
+          }
+        ],
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8}
+      }
+    ],
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "refresh": "5s"
+  }
+}
