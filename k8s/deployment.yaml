@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: upak-backend
+  labels:
+    app: upak-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: upak-backend
+  template:
+    metadata:
+      labels:
+        app: upak-backend
+    spec:
+      containers:
+      - name: upak-backend
+        image: upak-ai-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: upak-secrets
+              key: openai-api-key
+        - name: YANDEX_GPT_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: upak-secrets
+              key: yandex-gpt-api-key
+        - name: YANDEX_GPT_FOLDER_ID
+          valueFrom:
+            secretKeyRef:
+              name: upak-secrets
+              key: yandex-gpt-folder-id
+        - name: DATABASE_URL
+          value: "postgresql://upak_user:upak_password@postgres:5432/upak_db"
+        - name: REDIS_URL
+          value: "redis://redis:6379"
+        - name: DEBUG
+          value: "false"
+        - name: LOG_LEVEL
+          value: "info"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/v1/health
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
